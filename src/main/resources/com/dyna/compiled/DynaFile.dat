@@ -1,0 +1,11 @@
+import com.dyna.DynaCode.DynaInvokeRemote;
+import com.dyna.Javac;
+
+public class DynaInvokeRemoteImpl implements DynaInvokeRemote {
+	@Override
+	public Object invoke() {
+		Object o = null;
+		o = /*Method Stub*/;
+		return o;
+	}
+}
