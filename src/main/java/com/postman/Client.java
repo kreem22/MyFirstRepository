@@ -7,16 +7,16 @@ import com.dyna.DynaCode;
 
 public class Client {
 	public static void main(String[] args) {
-		java.lang.System.out.println(java.lang.String.valueOf("Hello World")
-				.split(" ")[java.lang.Integer.parseInt("1")]);
 		try {
 			BufferedReader sysin = new BufferedReader(new InputStreamReader(
 					System.in));
 
 			while (true) {
-				System.out.print("Enter a line: ");
+				System.out.println("Enter a line: ");
 				String dynaLine = sysin.readLine();
-				System.out.println(DynaCode.invoke(dynaLine));
+				Object o = DynaCode.invoke(dynaLine);
+				if(o != null)
+					System.out.println(o);
 			}
 		} catch (Exception e) {
 
