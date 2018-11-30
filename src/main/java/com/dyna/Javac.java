@@ -1,8 +1,13 @@
 package com.dyna;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 /**
@@ -43,8 +48,26 @@ public final class Javac {
 		PrintWriter errPrinter = new PrintWriter(err);
 		String args[] = buildJavacArgs(srcFiles);
 		String actualRunString = generateRunString(args);
+		InputStream oriStream = System.in;
+		for(final String srcFile : srcFiles)
+		{
+			try(final InputStream is = new FileInputStream(srcFile);
+			final InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+			final BufferedReader reader = new BufferedReader(isr);)
+			{
+				System.out.println("Compiling " + srcFile + "...");
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.write(line.getBytes(StandardCharsets.UTF_8));
+					System.out.write(System.getProperty("line.separator").getBytes());
+					System.out.flush();
+				}
+			}
+			catch (Exception e) {
+			}
+		}
 		int resultCode = com.sun.tools.javac.Main.compile(args, errPrinter);
-
+		
 		errPrinter.close();
 		return (resultCode == 0) ? null : err.toString();
 	}
