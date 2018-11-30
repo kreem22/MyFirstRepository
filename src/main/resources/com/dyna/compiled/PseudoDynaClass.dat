@@ -1,7 +1,7 @@
 import com.dyna.DynaCode.DynaInvokeRemote;
 import com.dyna.Javac;
 
-public class DynaInvokeRemoteImpl implements DynaInvokeRemote {
+public class PseudoDynaClass implements DynaInvokeRemote {
 	@Override
 	public Object invoke() {
 		Object o = null;

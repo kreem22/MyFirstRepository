@@ -1,7 +1,6 @@
-package com.postman;
+package com.dyna;
 
 import com.dyna.DynaCode.DynaInvokeRemote;
-import com.dyna.Javac;
 
 public class DynaInvokeRemoteImpl implements DynaInvokeRemote {
 	@SuppressWarnings("unused")

@@ -50,11 +50,9 @@ public final class DynaCode {
 	}
 
 	/**
-	 * @param compileClasspath
-	 *            used to compile dynamic classes
-	 * @param parentClassLoader
-	 *            the parent of the class loader that loads all the dynamic
-	 *            classes
+	 * @param compileClasspath  used to compile dynamic classes
+	 * @param parentClassLoader the parent of the class loader that loads all the
+	 *                          dynamic classes
 	 */
 	public DynaCode(String compileClasspath, ClassLoader parentClassLoader) {
 		this.compileClasspath = compileClasspath;
@@ -121,8 +119,7 @@ public final class DynaCode {
 	 * 
 	 * @param className
 	 * @return
-	 * @throws ClassNotFoundException
-	 *             if source file not found or compilation error
+	 * @throws ClassNotFoundException if source file not found or compilation error
 	 */
 	public Class<?> loadClass(String className) throws ClassNotFoundException {
 
@@ -137,8 +134,7 @@ public final class DynaCode {
 			String resource = className.replace('.', '/') + ".java";
 			SourceDir src = locateResource(resource);
 			if (src == null) {
-				throw new ClassNotFoundException("DynaCode class not found "
-						+ className);
+				throw new ClassNotFoundException("DynaCode class not found " + className);
 			}
 
 			synchronized (this) {
@@ -176,8 +172,7 @@ public final class DynaCode {
 	private void unload(SourceDir src) {
 		// clear loaded classes
 		synchronized (loadedClasses) {
-			for (Iterator<LoadedClass> iter = loadedClasses.values().iterator(); iter
-					.hasNext();) {
+			for (Iterator<LoadedClass> iter = loadedClasses.values().iterator(); iter.hasNext();) {
 				LoadedClass loadedClass = (LoadedClass) iter.next();
 				if (loadedClass.srcDir == src) {
 					iter.remove();
@@ -199,8 +194,7 @@ public final class DynaCode {
 		try {
 
 			SourceDir src = locateResource(resource);
-			return src == null ? null : new File(src.srcDir, resource).toURI()
-					.toURL();
+			return src == null ? null : new File(src.srcDir, resource).toURI().toURL();
 
 		} catch (MalformedURLException e) {
 			// should not happen
@@ -218,8 +212,7 @@ public final class DynaCode {
 		try {
 
 			SourceDir src = locateResource(resource);
-			return src == null ? null : new FileInputStream(new File(
-					src.srcDir, resource));
+			return src == null ? null : new FileInputStream(new File(src.srcDir, resource));
 
 		} catch (FileNotFoundException e) {
 			// should not happen
@@ -228,26 +221,21 @@ public final class DynaCode {
 	}
 
 	/**
-	 * Create a proxy instance that implements the specified access interface
-	 * and delegates incoming invocations to the specified dynamic
-	 * implementation. The dynamic implementation may change at run-time, and
-	 * the proxy will always delegates to the up-to-date implementation.
+	 * Create a proxy instance that implements the specified access interface and
+	 * delegates incoming invocations to the specified dynamic implementation. The
+	 * dynamic implementation may change at run-time, and the proxy will always
+	 * delegates to the up-to-date implementation.
 	 * 
-	 * @param interfaceClass
-	 *            the access interface
-	 * @param implClassName
-	 *            the backend dynamic implementation
+	 * @param interfaceClass the access interface
+	 * @param implClassName  the backend dynamic implementation
 	 * @return
-	 * @throws RuntimeException
-	 *             if an instance cannot be created, because of class not found
-	 *             for example
+	 * @throws RuntimeException if an instance cannot be created, because of class
+	 *                          not found for example
 	 */
-	public Object newProxyInstance(Class<?> interfaceClass,
-			final String dynaLine, final boolean isVoid)
+	public Object newProxyInstance(Class<?> interfaceClass, final String dynaLine, final boolean isVoid)
 			throws RuntimeException {
 		MyInvocationHandler handler = new MyInvocationHandler(dynaLine, isVoid);
-		return Proxy.newProxyInstance(interfaceClass.getClassLoader(),
-				new Class[] { interfaceClass }, handler);
+		return Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[] { interfaceClass }, handler);
 	}
 
 	private class SourceDir {
@@ -260,8 +248,7 @@ public final class DynaCode {
 		URLClassLoader classLoader;
 
 		SourceDir() {
-			this.binDir = new File(System.getProperty("java.io.tmpdir"),
-					"dynacode/");
+			this.binDir = new File(System.getProperty("java.io.tmpdir"), "dynacode/");
 			this.binDir.mkdirs();
 
 			this.srcDir = this.binDir;
@@ -277,11 +264,10 @@ public final class DynaCode {
 			/* this.srcDir = srcDir; */
 
 			/*
-			 * String subdir = srcDir.getAbsolutePath().replace(':', '_')
-			 * .replace('/', '_').replace('\\', '_');
+			 * String subdir = srcDir.getAbsolutePath().replace(':', '_') .replace('/',
+			 * '_').replace('\\', '_');
 			 */
-			this.binDir = new File(System.getProperty("java.io.tmpdir"),
-					"dynacode/"/* + subdir */);
+			this.binDir = new File(System.getProperty("java.io.tmpdir"), "dynacode/"/* + subdir */);
 			this.binDir.mkdirs();
 
 			this.srcDir = this.binDir;
@@ -295,8 +281,7 @@ public final class DynaCode {
 
 		void recreateClassLoader() {
 			try {
-				classLoader = new URLClassLoader(new URL[] { binDir.toURI()
-						.toURL() }, parentClassLoader);
+				classLoader = new URLClassLoader(new URL[] { binDir.toURI().toURL() }, parentClassLoader);
 			} catch (MalformedURLException e) {
 				// should not happen
 			}
@@ -345,13 +330,11 @@ public final class DynaCode {
 			}
 
 			if (error != null) {
-				throw new RuntimeException("Failed to compile "
-						+ srcFile.getAbsolutePath() + ". Error: " + error);
+				throw new RuntimeException("Failed to compile " + srcFile.getAbsolutePath() + ". Error: " + error);
 			}
 
 			if (!new File(srcDir.binDir + "\\" + className + ".class").exists()) {
-				throw new RuntimeException("Failed to compile "
-						+ srcFile.getAbsolutePath() + ". Error: " + error);
+				throw new RuntimeException("Failed to compile " + srcFile.getAbsolutePath() + ". Error: " + error);
 			}
 
 			try {
@@ -362,8 +345,7 @@ public final class DynaCode {
 				lastModified = srcFile.lastModified();
 
 			} catch (ClassNotFoundException e) {
-				throw new RuntimeException("Failed to load DynaCode class "
-						+ srcFile.getAbsolutePath());
+				throw new RuntimeException("Failed to load DynaCode class " + srcFile.getAbsolutePath());
 			}
 
 			info("Init " + clazz);
@@ -375,7 +357,7 @@ public final class DynaCode {
 		Object backend;
 
 		MyInvocationHandler(final String dynaLine, final boolean isVoid) {
-			createInvocationClass(dynaLine, isVoid);
+			generateInvocationClass(dynaLine, isVoid);
 			try {
 				Class<?> clz = loadClass(dynaImplClassName);
 				backend = newDynaCodeInstance(clz);
@@ -385,20 +367,17 @@ public final class DynaCode {
 			}
 		}
 
-		private void createInvocationClass(String dynaLine, boolean isVoid) {
+		private void generateInvocationClass(String dynaLine, boolean isVoid) {
 			final SourceDir sourceDir = sourceDirs.toArray(new SourceDir[] {})[0];
-			final String sourceFile = sourceDir.srcDir + "\\"
-					+ dynaImplClassName.replace('.', '/') + ".java";
-			try (InputStream is = Thread.currentThread()
-					.getContextClassLoader()
-					.getResourceAsStream("com/dyna/compiled/DynaFile.dat");
+			final String sourceFile = sourceDir.srcDir + "\\" + dynaImplClassName.replace('.', '/') + ".java";
+			try (InputStream is = Thread.currentThread().getContextClassLoader()
+					.getResourceAsStream("com/dyna/compiled/PseudoDynaClass.dat");
 					OutputStream os = new FileOutputStream(new File(sourceFile));
 					InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
 					OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
 					BufferedReader br = new BufferedReader(isr);
-					BufferedWriter bw = new BufferedWriter(osw);
-					) {
-				if (createSource(br, bw, new File(sourceFile), dynaLine, isVoid) == 0) {
+					BufferedWriter bw = new BufferedWriter(osw);) {
+				if (generateSource(br, bw, new File(sourceFile), dynaLine, isVoid) == 0) {
 					throw new RuntimeException("File not written");
 				}
 				sourceDir.recreateClassLoader();
@@ -407,22 +386,18 @@ public final class DynaCode {
 			}
 		}
 
-		private long createSource(final BufferedReader br, final BufferedWriter bw, final File sourceFile,
+		private long generateSource(final BufferedReader br, final BufferedWriter bw, final File sourceFile,
 				final String dynaLine, final boolean isVoid) throws IOException {
 			long nread = 0L;
 			String line;
-			while ((line  = br.readLine()) != null) {
-				line = line
-						.replaceAll(
-								"DynaInvokeRemoteImpl",
-								sourceFile.getName().substring(0,
-										sourceFile.getName().indexOf(".")));
-				if(isVoid){
+			while ((line = br.readLine()) != null) {
+				line = line.replaceAll("PseudoDynaClass",
+						sourceFile.getName().substring(0, sourceFile.getName().indexOf(".")));
+				if (isVoid) {
 					line = line.replaceAll("o = [/][*]Method Stub[*][/]", dynaLine);
-				}
-				else
+				} else
 					line = line.replaceAll("[/][*]Method Stub[*][/]", dynaLine);
-									
+
 				bw.write(line + System.getProperty("line.separator"));
 				++nread;
 			}
@@ -430,8 +405,7 @@ public final class DynaCode {
 			return nread;
 		}
 
-		public Object invoke(Object proxy, Method method, Object[] args)
-				throws Throwable {
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
 			// check if class has been updated
 			Class<?> clz = loadClass(dynaImplClassName);
@@ -452,9 +426,7 @@ public final class DynaCode {
 			try {
 				return clz.newInstance();
 			} catch (Exception e) {
-				throw new RuntimeException(
-						"Failed to new instance of DynaCode class "
-								+ clz.getName(), e);
+				throw new RuntimeException("Failed to new instance of DynaCode class " + clz.getName(), e);
 			}
 		}
 
@@ -474,10 +446,8 @@ public final class DynaCode {
 					if (buf.length() > 0) {
 						buf.append(File.pathSeparatorChar);
 					}
-					if (System.getProperty("os.name").toLowerCase()
-							.contains("win"))
-						buf.append(new File(urls[i].getFile())
-								.getAbsolutePath());
+					if (System.getProperty("os.name").toLowerCase().contains("win"))
+						buf.append(new File(urls[i].getFile()).getAbsolutePath());
 					else
 						buf.append(urls[i].getFile());
 				}
@@ -495,22 +465,18 @@ public final class DynaCode {
 		System.out.println("[DynaCode] " + msg);
 	}
 
-	private static DynaInvokeRemote getDynaInvokeRemote(final String dynaLine,
-			final boolean isVoid) {
+	private static DynaInvokeRemote getDynaInvokeRemote(final String dynaLine, final boolean isVoid) {
 		DynaCode dynacode = new DynaCode();
-		return (DynaInvokeRemote) dynacode.newProxyInstance(
-				DynaInvokeRemote.class, dynaLine, isVoid);
+		return (DynaInvokeRemote) dynacode.newProxyInstance(DynaInvokeRemote.class, dynaLine, isVoid);
 	}
 
 	public static Object invoke(final String dynaLine) {
 		try {
-			final DynaInvokeRemote dynaInvokeRemote = DynaCode
-					.getDynaInvokeRemote(dynaLine, false);
+			final DynaInvokeRemote dynaInvokeRemote = DynaCode.getDynaInvokeRemote(dynaLine, false);
 			return dynaInvokeRemote.invoke();
 		} catch (Exception e) {
 			try {
-				final DynaInvokeRemote dynaInvokeRemote = DynaCode
-						.getDynaInvokeRemote(dynaLine, true);
+				final DynaInvokeRemote dynaInvokeRemote = DynaCode.getDynaInvokeRemote(dynaLine, true);
 				return dynaInvokeRemote.invoke();
 			} catch (Exception e1) {
 				e1.printStackTrace();

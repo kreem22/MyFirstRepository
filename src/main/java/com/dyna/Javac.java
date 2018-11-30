@@ -12,19 +12,19 @@ import java.util.ArrayList;
  */
 public final class Javac {
 
-	String classpath;
+	private String classpath;
 
-	String outputdir;
+	private String outputdir;
 
-	String sourcepath;
+	private String sourcepath;
 
-	String bootclasspath;
+	private String bootclasspath;
 
-	String extdirs;
+	private String extdirs;
 
-	String encoding;
+	private String encoding;
 
-	String target;
+	private String target;
 
 	public Javac(String classpath, String outputdir) {
 		this.classpath = classpath;
@@ -51,8 +51,7 @@ public final class Javac {
 
 	private String generateRunString(String[] args) {
 		StringBuilder buf = new StringBuilder("javac ");
-		for(String arg : args)
-		{
+		for (String arg : args) {
 			buf.append(arg + " ");
 		}
 		return buf.toString();
