@@ -24,8 +24,6 @@ dependencies {
     // implementation 'com.google.guava:guava:23.0'
     compile 'com.google.guava:guava:23.0'
     
-    compile files("${System.properties['java.home']}/../lib/tools.jar")
-    
     compile files("/lib/DynaLoad.jar")
     
     compile files("/lib/procyon-decompiler-0.5.30.jar")

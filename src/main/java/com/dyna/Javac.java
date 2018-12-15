@@ -7,8 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A wrapper to ease the use of com.sun.tools.javac.Main.
@@ -42,19 +47,14 @@ public final class Javac {
 	 * @param srcFiles
 	 * @return null if success; or compilation errors
 	 */
-	@SuppressWarnings("unused")
 	public String compile(String srcFiles[]) {
 		StringWriter err = new StringWriter();
 		PrintWriter errPrinter = new PrintWriter(err);
 		String args[] = buildJavacArgs(srcFiles);
-		String actualRunString = generateRunString(args);
-		InputStream oriStream = System.in;
-		for(final String srcFile : srcFiles)
-		{
-			try(final InputStream is = new FileInputStream(srcFile);
-			final InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-			final BufferedReader reader = new BufferedReader(isr);)
-			{
+		for (final String srcFile : srcFiles) {
+			try (final InputStream is = new FileInputStream(srcFile);
+					final InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+					final BufferedReader reader = new BufferedReader(isr);) {
 				System.out.println("Compiling " + srcFile + "...");
 				String line;
 				while ((line = reader.readLine()) != null) {
@@ -62,22 +62,13 @@ public final class Javac {
 					System.out.write(System.getProperty("line.separator").getBytes());
 					System.out.flush();
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 			}
 		}
-		int resultCode = com.sun.tools.javac.Main.compile(args, errPrinter);
-		
+		int resultCode = compile(args, errPrinter);
+
 		errPrinter.close();
 		return (resultCode == 0) ? null : err.toString();
-	}
-
-	private String generateRunString(String[] args) {
-		StringBuilder buf = new StringBuilder("javac ");
-		for (String arg : args) {
-			buf.append(arg + " ");
-		}
-		return buf.toString();
 	}
 
 	public String compile(File srcFiles[]) {
@@ -179,6 +170,44 @@ public final class Javac {
 
 	public void setTarget(String target) {
 		this.target = target;
+	}
+
+	private static File searchToolsDotJar(Set<String> set) {
+		if (set == null)
+			set = new HashSet<String>(System.getenv().values());
+		for (final String d : set) {
+
+			if (d.contains(";")) {
+				File tmp = searchToolsDotJar(new HashSet<>(Arrays.asList(d.split(";"))));
+				if (tmp != null)
+					return tmp;
+			}
+			File toolsDotJar = new File(d + "/lib/tools.jar");
+
+			if (d.toUpperCase().contains("JDK") && toolsDotJar.exists()) {
+				return toolsDotJar;
+			}
+		}
+		return null;
+	}
+
+	private static int compile(final String[] args, final PrintWriter pw) {
+		final File toolsDotJar = searchToolsDotJar(null);
+		if (toolsDotJar != null) {
+			ClassLoader cl = null;
+			try {
+				cl = new URLClassLoader(new URL[] { toolsDotJar.toURI().toURL() });
+				final Class<?> jCompiler = cl.loadClass("com.sun.tools.javac.Main");
+				return (Integer) jCompiler
+						.getDeclaredMethod("compile", new Class[] { String[].class, PrintWriter.class })
+						.invoke(null, new Object[] { args, pw });
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+
+			}
+		}
+		throw new RuntimeException();
 	}
 
 }
